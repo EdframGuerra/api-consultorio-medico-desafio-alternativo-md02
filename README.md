@@ -177,7 +177,7 @@ Esse endpoint deverá criar uma consulta médica, onde será gerado um identific
 
 - Você deverá, **OBRIGATORIAMENTE**:
 
-  - Criar uma consula médica cuja o identificador é único
+  - Criar uma consulta médica cuja o identificador é único
   - CPF deve ser um campo único
   - Verificar se todos os campos foram informados (todos são obrigatórios)
   - Verifica se o valor da consulta é numérico
