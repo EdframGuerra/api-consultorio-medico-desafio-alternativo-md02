@@ -5,7 +5,7 @@
 Você acabou de ser contratado pela melhor empresa de tecnologia do mundo: a **CUBOS**.
 Sua primeira tarefa como programador é criar uma api para um Consultório Médico. Esse será um pojeto **MVP** (Produto Viável Mínimo), ou seja, em um futuro próximo outras funcionalidade surgirão para agragar ainda mais ao projeto, sendo assim os dados do banco (nomePaciente, consultório, etc.) serão imutáveis (estáticos).
 
-Seu papel enquanto desenvolvedor será construir uma RESTful API que perimita:
+Seu papel enquanto desenvolvedor será construir uma RESTful API que permita:
 
 - Criar consulta médica
 - Listar consultas médicas
