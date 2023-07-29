@@ -1,9 +1,8 @@
 const express = require('express')
+const { listarConsultas } = require('../controladores/controladorConsulta')
 
 const rotas = express.Router()
 
-rotas.get('/', (req, res) => {
-    res.send('Hello World!')
-})
+rotas.get('/consultas', listarConsultas)
 
 module.exports = rotas
