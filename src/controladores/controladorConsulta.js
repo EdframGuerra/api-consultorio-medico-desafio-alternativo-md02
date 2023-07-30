@@ -121,8 +121,38 @@ const atualizarDadosPaciente = async (req, res) => {
     }
 }
 
+const cancelarConsulta = async (req, res) => {
+    const { id } = req.params
+
+    try {
+        const consulta = await knex('consultas').where({ id }).first()
+
+        if (!consulta) {
+            return res.status(404).json({ mensagem: 'Consulta não encontrada' })
+        }
+
+        if (consulta.finalizada == true) {
+            return res.status(400).json({ mensagem: 'Não é possivel cancelar uma consulta finalizada' })
+        }
+
+        const consultaCancelada = await knex('consultas').where({ id }).del()
+
+        if (!consultaCancelada) {
+            return res.status(400).json({ mensagem: 'Não foi possível cancelar a consulta' })
+        }
+
+        return res.status(200).send()
+
+    } catch (error) {
+        return res.status(500).json({ mensagem: error.message })
+    }
+}
+
+
 
 module.exports = {
     listarConsultas,
     cadastrarConsulta,
-    atualizarDadosPaciente}
+    atualizarDadosPaciente,
+    cancelarConsulta
+}
