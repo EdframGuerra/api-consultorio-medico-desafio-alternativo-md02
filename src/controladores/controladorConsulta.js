@@ -68,7 +68,61 @@ const cadastrarConsulta = async (req, res) => {
     }
 }
 
+const atualizarDadosPaciente = async (req, res) => {
+    const { nome, cpf, data_nascimento, celular, email, senha } = req.body
+    const { id } = req.params
+
+    if (!nome || !cpf || !data_nascimento || !celular || !email || !senha) {
+        return res.status(400).json({ mensagem: 'Todos os campos do paciente são obrigatórios' })
+    }
+
+    try {
+        const consulta = await knex('consultas').where({ id }).first()
+
+        if (id) {
+            if (!consulta) {
+                return res.status(404).json({ mensagem: 'Consulta não encontrada' })
+            }
+        }
+
+        if (cpf) {
+            const paciente = await knex('paciente').where({ cpf }).first()
+
+            if (paciente && paciente.cpf !== cpf) {
+                return res.status(400).json({ mensagem: 'Já existe um paciente cadastrado com o cpf informado' })
+            }
+        }
+
+        if (email) {
+            const paciente = await knex('paciente').where({ email }).first()
+
+            if (paciente && paciente.email !== email) {
+                return res.status(400).json({ mensagem: 'Já existe um paciente cadastrado com o e-mail informado' })
+            }
+        }
+
+        if (consulta.finalizada == true) {
+            return res.status(400).json({ mensagem: 'Não é possivel atualizar uma consulta finalizada' })
+        }
+
+        const pacienteAtualizado = await knex('paciente').where({ cpf }).update({ nome, cpf, data_nascimento, celular, email, senha })
+
+        if (!pacienteAtualizado) {
+            return res.status(400).json({ mensagem: 'Não foi possível atualizar o paciente' })
+        }
+
+        return res.status(200).send()
+    }
+
+
+
+    catch (error) {
+        return res.status(500).json({ mensagem: error.message })
+    }
+}
+
+
 module.exports = {
     listarConsultas,
-    cadastrarConsulta
-}
+    cadastrarConsulta,
+    atualizarDadosPaciente}

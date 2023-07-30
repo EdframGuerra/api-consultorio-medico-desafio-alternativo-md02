@@ -1,9 +1,11 @@
 const express = require('express')
-const { listarConsultas, cadastrarConsulta } = require('../controladores/controladorConsulta')
+const { listarConsultas, cadastrarConsulta, atualizarDadosPaciente } = require('../controladores/controladorConsulta')
 
 const rotas = express.Router()
 
 rotas.get('/consultas', listarConsultas)
 rotas.post('/consulta', cadastrarConsulta)
+rotas.put('/consulta/:id/paciente', atualizarDadosPaciente)
+
 
 module.exports = rotas
