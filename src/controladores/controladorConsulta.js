@@ -149,10 +149,46 @@ const cancelarConsulta = async (req, res) => {
 }
 
 
+const finalizarConsulta = async (req, res) => {
+    const { consulta_id, laudo } = req.body
+
+    if (!laudo || !consulta_id) {
+        return res.status(400).json({ mensagem: 'Os campos devem ser preenchidos' })
+    }
+
+    try {
+        const consulta = await knex('consultas').where({ id: consulta_id }).first()
+        if (!consulta) {
+            return res.status(404).json({ mensagem: 'Consulta não encontrada' })
+        }
+        if (consulta.finalizada == true) {
+            return res.status(400).json({ mensagem: 'Consulta já finalizada' })
+        }
+
+        if (laudo.length < 0 && laudo.length <= 200) {
+            return res.status(400).json({
+                mensagem: 'Laudo deve ter possuir no minimo 200 caracteres'
+            })
+        }
+        const laudoMedico = await knex('consultas').where({ id: consulta_id }).update({ laudo, finalizada: true })
+
+        if(!laudoMedico){
+            return res.status(400).json({mensagem: 'Não foi possível finalizar a consulta'})
+        }
+
+        return res.status(204).send()
+
+    } catch (error) {
+        return res.status(500).json({ mensagem: error.message })
+    }
+
+}
+
 
 module.exports = {
     listarConsultas,
     cadastrarConsulta,
     atualizarDadosPaciente,
-    cancelarConsulta
+    cancelarConsulta,
+    finalizarConsulta
 }
