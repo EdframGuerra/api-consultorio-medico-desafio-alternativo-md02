@@ -1,33 +1,8 @@
 const knex = require('../conexaoBancoDados/conexao')
 
 const listarConsultas = async (req, res) => {
-    const { cnes_consultorio, senha_consultorio } = req.query
-
-    if (!cnes_consultorio || !senha_consultorio) {
-        return res.status(404).json({ mensagem: 'O campos cnes_consultorio e senha_consultório são  obrigatórios' })
-    }
-
-    if (cnes_consultorio !== '1001' && senha_consultorio !== 'CubosHealth@2022') {
-        return res.status(404).json({ mensagem: 'Acesso negado' })
-    }
-
+   
     try {
-
-        //     //listar os dados da tabela consultas conforme o objnto {
-        // identificador: 3,
-        // tipoConsulta: "ODONTOLOGIA",
-        // identificadorMedico: 1,
-        // finalizada: false,
-        // valorConsulta: 5000,
-        // paciente: {
-        //   nome: "John Doe 3",
-        //   cpf: "55132392053",
-        //   dataNascimento: "2022-02-02",
-        //   celular: "11999997777",
-        //   email: "john@doe3.com",
-        //   senha: "1234",
-        // }
-
         const consultas = await knex('consultas').join('pacientes', 'pacientes.cpf', 'consultas.paciente').join('medicos', 'medicos.id', 'consultas.medico_id').select('consultas.id', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.nome as nome_medico', 'medicos.especialidade as especialidade_medico').orderBy('consultas.id')
 
         if (!consultas) {
@@ -53,7 +28,6 @@ const cadastrarConsulta = async (req, res) => {
     if (typeof valor_consulta !== 'number') {
         return res.status(400).json({ mensagem: 'O campo valor da consulta deve ser um número' })
     }
-
     const { nome, cpf, data_nascimento, celular, email, senha } = paciente
 
     if (!nome || !cpf || !data_nascimento || !celular || !email || !senha) {
@@ -305,8 +279,6 @@ const listarMedico = async (req, res) => {
         return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
 }
-
-
 
 
 module.exports = {
