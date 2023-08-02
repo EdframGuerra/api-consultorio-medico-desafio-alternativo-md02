@@ -1,5 +1,5 @@
 const express = require('express')
-const { listarConsultas, cadastrarConsulta, atualizarDadosPaciente, cancelarConsulta, finalizarConsulta, laudoMedico, listarMedico } = require('../controladores/controladorConsulta')
+const { listarConsultas, cadastrarConsulta, atualizarDadosPaciente, cancelarConsulta, finalizarConsulta, listarMedico, ListarlaudoMedico } = require('../controladores/controladorConsulta')
 const { validacao } = require('../intermediarios/intermediario')
 
 const rotas = express.Router()
@@ -9,7 +9,7 @@ rotas.post('/consulta', cadastrarConsulta)
 rotas.put('/consulta/:id/paciente', atualizarDadosPaciente)
 rotas.delete('/consulta/:id', cancelarConsulta)
 rotas.post('/consulta/finalizar', finalizarConsulta)
-rotas.get('/consulta/laudo', laudoMedico)
+rotas.get('/consulta/laudo', ListarlaudoMedico)
 rotas.get('/consulta/medico', listarMedico)
 
 

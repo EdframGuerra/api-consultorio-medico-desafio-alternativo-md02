@@ -16,7 +16,7 @@ create table consultas(
 );
 
 
-create table paciente(
+create table pacientes(
   id serial primary key,
   nome text,
   cpf text unique,

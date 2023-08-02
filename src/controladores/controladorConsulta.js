@@ -13,7 +13,7 @@ const listarConsultas = async (req, res) => {
             return item = {
                 id: item.id,
                 tipo_consulta: item.tipo_consulta,
-                medico: item.medico_id,
+                medico_id: item.medico_id,
                 finalizada: item.finalizada,
                 valor_consulta: item.valor_consulta,
                 paciente: {
@@ -26,11 +26,9 @@ const listarConsultas = async (req, res) => {
             }
         })
 
-        console.log(consulta)
         return res.status(200).json(consulta)
 
     } catch (error) {
-        console.log(error)
         return res.status(500).json({ mensagem: 'Erro interno servidor' })
     }
 }
@@ -71,7 +69,7 @@ const cadastrarConsulta = async (req, res) => {
             const medico = await knex('medicos').where({ especialidade: tipo_consulta }).first()
 
             if (!medico) {
-                return res.status(400).json({ mensagem: 'Não existe médico cadastrado com a especialidade informada' })
+                return res.status(400).json({ mensagem: 'Não existe médico para especialidade informada' })
             }
         }
 
@@ -80,8 +78,6 @@ const cadastrarConsulta = async (req, res) => {
         if (!consulta) {
             return res.status(400).json({ mensagem: 'Não foi possível cadastrar a consulta' })
         }
-
-        // const { id } = consulta[0]
 
         return res.status(201).json()
 
@@ -97,14 +93,15 @@ const atualizarDadosPaciente = async (req, res) => {
     if (!nome || !cpf || !data_nascimento || !celular || !email || !senha) {
         return res.status(400).json({ mensagem: 'Todos os campos do paciente são obrigatórios' })
     }
+    if (!id) {
+        return res.status(400).json({ mensagem: 'Informe o id do paciente' })
+    }
 
     try {
         const consulta = await knex('consultas').where({ id }).first()
 
-        if (id) {
-            if (!consulta) {
-                return res.status(404).json({ mensagem: 'Consulta não encontrada' })
-            }
+        if (!consulta) {
+            return res.status(404).json({ mensagem: 'Consulta não encontrada' })
         }
 
         if (cpf) {
@@ -133,11 +130,20 @@ const atualizarDadosPaciente = async (req, res) => {
             return res.status(400).json({ mensagem: 'Não foi possível atualizar o paciente' })
         }
 
+        if (pacienteAtualizado) {
+            const consultaAtualizada = await knex('consultas').where({ id }).update({ paciente: cpf })
+
+            if (!consultaAtualizada) {
+                return res.status(400).json({ mensagem: 'Não foi possível atualizar a consulta' })
+            }
+        }
+
         return res.status(200).send()
     }
 
     catch (error) {
-        return res.status(500).json({ mensagem: error.message })
+        console.log(error.message)
+        return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
 }
 
@@ -164,10 +170,9 @@ const cancelarConsulta = async (req, res) => {
         return res.status(200).send()
 
     } catch (error) {
-        return res.status(500).json({ mensagem: error.message })
+        return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
 }
-
 
 
 const finalizarConsulta = async (req, res) => {
@@ -192,11 +197,7 @@ const finalizarConsulta = async (req, res) => {
             })
         }
 
-        const paciente = consulta.paciente[0]
-
         const laudoMedico = await knex('laudo').insert({ consulta_id, medico_id: consulta.medico_id, laudo, paciente_id: consulta.id })
-            .join('consultas', 'consultas.id', 'laudo.consulta_id').join('medicos', 'medicos.id', 'laudo.medico_id').join('pacientes', 'pacientes.id', 'laudo.paciente_id').select('laudo.id', 'laudo.laudo', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.nome as nome_medico', 'medicos.especialidade as especialidade_medico').orderBy('consultas.id')
-
 
         if (!laudoMedico) {
             return res.status(400).json({ mensagem: 'Não foi possível finalizar a consulta' })
@@ -211,27 +212,22 @@ const finalizarConsulta = async (req, res) => {
         }
 
         const consultaFinalizada = await knex('consulta_finalizada')
-            .insert({ tipo_consulta: consulta.tipo_consulta, medico_id: consulta.medico_id, finalizada: true, laudo_id: laudoMedico.id, valor_consulta: consulta.valor_consulta, paciente_id: consulta.id }).join('consultas', 'consultas.id', 'consulta_finalizada.consulta_id')
-            .join('medicos', 'medicos.id', 'consulta_finalizada.medico_id')
-            .join('pacientes', 'pacientes.id', 'consulta_finalizada.paciente_id')
-            .join('laudo', 'laudo.id').select('consulta_finalizada.id', 'consulta_finalizada.tipo_consulta', 'consulta_finalizada.valor_consulta', 'consulta_finalizada.finalizada', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.nome as nome_medico', 'medicos.especialidade as especialidade_medico')
-            .orderBy('consultas.id')
+            .insert({ tipo_consulta: consulta.tipo_consulta, medico_id: consulta.medico_id, finalizada: true, laudo_id: laudoMedico.id, valor_consulta: consulta.valor_consulta, paciente_id: consulta.id })
 
         if (!consultaFinalizada) {
             return res.status(400).json({ mensagem: 'Não foi possível finalizar a consulta' })
         }
 
-
         return res.status(204).send()
 
     } catch (error) {
-        return res.status(500).json({ mensagem: error.message })
+        return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
 
 }
 
 
-const laudoMedico = async (req, res) => {
+const ListarlaudoMedico = async (req, res) => {
     const { id, senha } = req.query
 
     if (!id && !senha) {
@@ -263,7 +259,7 @@ const laudoMedico = async (req, res) => {
 
 
     } catch (error) {
-        return res.status(500).json({ mensagem: error.message })
+        return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
 }
 
@@ -275,26 +271,36 @@ const listarMedico = async (req, res) => {
     }
 
     try {
+        const consultas = await knex('consultas').where({ medico_id: id }).join('pacientes', 'pacientes.cpf', 'consultas.paciente').join('medicos', 'medicos.id', 'consultas.medico_id').join('laudo', 'laudo.consulta_id', 'consultas.id').select('consultas.id', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.id as medico_id', 'laudo.id as laudo_id').orderBy('consultas.id')
 
-        const medicoExiste = await knex('medicos').where({ id }).first()
-
-        if (!medicoExiste) {
-            return res.status(404).json({ mensagem: 'Médico não encontrado' })
-        }
-
-        const consultaRealizadaPeloMedico = await knex('consultas').where({ medico_id: id })
-            .join('pacientes', 'pacientes.cpf', 'consultas.paciente')
-            .join('medicos', 'medicos.id', 'consultas.medico_id')
-            .select('consultas.id', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.nome as nome_medico', 'medicos.especialidade as especialidade_medico').orderBy('consultas.id')
-
-        if (!consultaRealizadaPeloMedico) {
+        if (!consultas) {
             return res.status(404).json({ mensagem: 'Não foi possível listar as consultas realizadas pelo médico' })
         }
 
-        return res.status(200).json(consultaRealizadaPeloMedico)
+        const consultasRealizadas = consultas.map(item => {
+            return item = {
+                id: item.id,
+                tipo_consulta: item.tipo_consulta,
+                medico_id: item.medico_id,
+                finalizada: item.finalizada,
+                laudo_id: item.laudo_id,
+                valor_consulta: item.valor_consulta,
+                paciente: {
+                    nome: item.nome_paciente,
+                    cpf: item.cpf_paciente,
+                    data_nascimento: item.data_nascimento_paciente,
+                    celular: item.celular_paciente,
+                    email: item.email_paciente,
+                    senha: item.senha_paciente
+                }
+
+            }
+        })
+        return res.status(200).json(consultasRealizadas)
 
     } catch (error) {
-        return res.status(500).json({ mensagem: 'Erro interno do servidor' })
+        console.log(error.message)
+return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
 }
 
@@ -305,6 +311,12 @@ module.exports = {
     atualizarDadosPaciente,
     cancelarConsulta,
     finalizarConsulta,
-    laudoMedico,
+    ListarlaudoMedico,
     listarMedico
 }
+
+
+
+// na tabela de consultas onde o medico_id é igual ao id, selecione todas as consultas que a coluna finalizada for == true
+
+
