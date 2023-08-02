@@ -1,15 +1,33 @@
 const knex = require('../conexaoBancoDados/conexao')
 
 const listarConsultas = async (req, res) => {
-   
+
     try {
-        const consultas = await knex('consultas').join('pacientes', 'pacientes.cpf', 'consultas.paciente').join('medicos', 'medicos.id', 'consultas.medico_id').select('consultas.id', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.nome as nome_medico', 'medicos.especialidade as especialidade_medico').orderBy('consultas.id')
+        const consultas = await knex('consultas').join('pacientes', 'pacientes.cpf', 'consultas.paciente').join('medicos', 'medicos.id', 'consultas.medico_id').select('consultas.id', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.id as medico_id', 'medicos.especialidade as especialidade_medico').orderBy('consultas.id')
 
         if (!consultas) {
             return res.status(400).json({ mensagem: 'Não foi possível listar as consultas' })
         }
 
-        return res.status(200).json(consultas)
+        const consulta = consultas.map(item => {
+            return item = {
+                id: item.id,
+                tipo_consulta: item.tipo_consulta,
+                medico: item.medico_id,
+                finalizada: item.finalizada,
+                valor_consulta: item.valor_consulta,
+                paciente: {
+                    nome: item.nome_paciente,
+                    cpf: item.cpf_paciente,
+                    data_nascimento: item.data_nascimento_paciente,
+                    celular: item.celular_paciente,
+                    email: item.email_paciente
+                }
+            }
+        })
+
+        console.log(consulta)
+        return res.status(200).json(consulta)
 
     } catch (error) {
         console.log(error)
@@ -228,7 +246,7 @@ const laudoMedico = async (req, res) => {
         const consulta = await knex('laudo').where({ consulta_id: id }).first()
 
         if (!consulta) {
-            return res.status(404).json({ mensagem: 'Consulta não encontrada' })
+            return res.status(404).json({ mensagem: 'A consulta informada não possui laudo' })
         }
 
         if (consulta.finalizada == false) {

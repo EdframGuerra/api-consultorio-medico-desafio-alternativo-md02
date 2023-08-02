@@ -13,6 +13,5 @@ const validacao = async (req, res, next) => {
 }
 
 module.exports = {
-    validacao,
-    validacaoCorpoCadastro
+    validacao
 }
