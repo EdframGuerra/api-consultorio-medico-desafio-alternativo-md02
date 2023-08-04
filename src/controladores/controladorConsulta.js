@@ -263,7 +263,7 @@ const ListarlaudoMedico = async (req, res) => {
     }
 }
 
-const listarMedico = async (req, res) => {
+const listarConsultasMedico = async (req, res) => {
     const { id } = req.query
 
     if (!id) {
@@ -271,7 +271,12 @@ const listarMedico = async (req, res) => {
     }
 
     try {
-        const consultas = await knex('consultas').where({ medico_id: id }).join('pacientes', 'pacientes.cpf', 'consultas.paciente').join('medicos', 'medicos.id', 'consultas.medico_id').join('laudo', 'laudo.consulta_id', 'consultas.id').select('consultas.id', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.id as medico_id', 'laudo.id as laudo_id').orderBy('consultas.id')
+        const consultas = await knex('consultas')
+            .where({ medico_id: id, finalizada: true })
+            .join('pacientes', 'pacientes.cpf', 'consultas.paciente')
+            .join('laudo', 'laudo.consulta_id', 'consultas.id')
+            .select('consultas.id', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'laudo.laudo as laudo_medico')
+
 
         if (!consultas) {
             return res.status(404).json({ mensagem: 'Não foi possível listar as consultas realizadas pelo médico' })
@@ -299,8 +304,8 @@ const listarMedico = async (req, res) => {
         return res.status(200).json(consultasRealizadas)
 
     } catch (error) {
-        console.log(error.message)
-return res.status(500).json({ mensagem: 'Erro interno do servidor' })
+        console.log(error)
+        return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
 }
 
@@ -312,11 +317,7 @@ module.exports = {
     cancelarConsulta,
     finalizarConsulta,
     ListarlaudoMedico,
-    listarMedico
+    listarConsultasMedico
 }
-
-
-
-// na tabela de consultas onde o medico_id é igual ao id, selecione todas as consultas que a coluna finalizada for == true
 
 
