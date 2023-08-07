@@ -274,8 +274,8 @@ const listarConsultasMedico = async (req, res) => {
         const consultas = await knex('consultas')
             .where({ medico_id: id, finalizada: true })
             .join('pacientes', 'pacientes.cpf', 'consultas.paciente')
-            .join('laudo', 'laudo.consulta_id', 'consultas.id')
-            .select('consultas.id', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'laudo.laudo as laudo_medico')
+            .join('medicos', 'medicos.id', 'consultas.medico_id')
+            .select('consultas.id', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'consultas.laudo_id', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.id as medico_id', 'medicos.especialidade as especialidade_medico').orderBy('consultas.id')
 
 
         if (!consultas) {
