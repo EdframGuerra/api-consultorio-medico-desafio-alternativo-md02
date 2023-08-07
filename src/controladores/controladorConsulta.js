@@ -271,11 +271,11 @@ const listarConsultasMedico = async (req, res) => {
     }
 
     try {
-        const consultas = await knex('consultas')
-            .where({ medico_id: id, finalizada: true })
-            .join('pacientes', 'pacientes.cpf', 'consultas.paciente')
-            .join('medicos', 'medicos.id', 'consultas.medico_id')
-            .select('consultas.id', 'consultas.tipo_consulta', 'consultas.valor_consulta', 'consultas.finalizada', 'consultas.laudo_id', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.id as medico_id', 'medicos.especialidade as especialidade_medico').orderBy('consultas.id')
+        const consultas = await knex('consulta_finalizada')
+            .where({ medico_id: id})
+            .join('pacientes', 'pacientes.id', 'consulta_finalizada.paciente_id')
+            .join('medicos', 'medicos.id', 'consulta_finalizada.medico_id')
+            .select('consulta_finalizada.id', 'consulta_finalizada.tipo_consulta', 'consulta_finalizada.valor_consulta', 'consulta_finalizada.finalizada', 'consulta_finalizada.laudo_id', 'pacientes.nome as nome_paciente', 'pacientes.cpf as cpf_paciente', 'pacientes.data_nascimento as data_nascimento_paciente', 'pacientes.celular as celular_paciente', 'pacientes.email as email_paciente', 'medicos.id as medico_id', 'medicos.especialidade as especialidade_medico').orderBy('consulta_finalizada.id')
 
 
         if (!consultas) {
